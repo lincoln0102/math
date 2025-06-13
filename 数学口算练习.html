@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>口算巧算练习 - 三位数加减法</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', '微软雅黑', sans-serif;
+            background: linear-gradient(135deg, #e0f7fa, #bbdefb);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #0d47a1;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subtitle {
+            color: #1976d2;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+        }
+        
+        .intro {
+            background-color: #e3f2fd;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+        }
+        
+        .intro h2 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+        
+        .intro ul {
+            padding-left: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .intro li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .problem-container {
+            background-color: #f5f5f5;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .problem-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .problem-card {
+            flex: 1 1 calc(25% - 20px);
+            min-width: 200px;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 3px solid #bbdefb;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .problem-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            border-color: #64b5f6;
+        }
+        
+        .problem-card.selected {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+        
+        .problem-number {
+            color: #666;
+            font-weight: bold;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        
+        .problem-expression {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            color: #0d47a1;
+            margin-bottom: 0;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .solution-container {
+            background-color: #e8f5e9;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .solution-container.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .solution-title {
+            color: #2e7d32;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .solution-steps {
+            padding-left: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .solution-steps li {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-size: 1.2rem;
+        }
+        
+        .step-highlight {
+            background-color: #ffecb3;
+            padding: 0 5px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .final-answer {
+            background-color: #c8e6c9;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 1.8rem;
+            text-align: center;
+            font-weight: bold;
+            color: #1b5e20;
+            margin-bottom: 20px;
+        }
+        
+        .tips {
+            background-color: #fff8e1;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+            margin-top: 15px;
+        }
+        
+        button {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+            display: block;
+            margin: 25px auto 0;
+        }
+        
+        button:hover {
+            background-color: #0d47a1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 900px) {
+            .problem-card {
+                flex: 1 1 calc(33.333% - 20px);
+            }
+        }
+        
+        @media (max-width: 650px) {
+            .problem-card {
+                flex: 1 1 calc(50% - 20px);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .problem-card {
+                flex: 1 1 100%;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .problem-expression {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>口算巧算练习</h1>
+            <div class="subtitle">三位数加减法 - 巧算技巧训练</div>
+        </header>
+        
+        <section class="intro">
+            <h2>巧算技巧介绍</h2>
+            <p>巧算是一种通过变换算式使计算更简单的方法，特别适合口算练习！</p>
+            <ul>
+                <li><strong>凑整法</strong>：把接近整十、整百的数凑成整十、整百再计算</li>
+                <li><strong>拆分法</strong>：把一个数拆分成容易计算的数</li>
+                <li><strong>带符号搬家</strong>：移动数字位置让计算更简单</li>
+                <li><strong>基准数法</strong>：使用一个接近的数字作为基准</li>
+            </ul>
+            <p>点击下方的算式，学习巧算技巧的步骤和方法！</p>
+        </section>
+        
+        <section class="problem-container">
+            <div class="problem-row">
+                <div class="problem-card" data-index="0">
+                    <div class="problem-number">题目1</div>
+                    <div class="problem-expression">783 + 299 = ?</div>
+                </div>
+                <div class="problem-card" data-index="1">
+                    <div class="problem-number">题目2</div>
+                    <div class="problem-expression">589 + 179 = ?</div>
+                </div>
+                <div class="problem-card" data-index="2">
+                    <div class="problem-number">题目3</div>
+                    <div class="problem-expression">186 + 314 = ?</div>
+                </div>
+                <div class="problem-card" data-index="3">
+                    <div class="problem-number">题目4</div>
+                    <div class="problem-expression">680 + 258 = ?</div>
+                </div>
+            </div>
+            
+            <div class="problem-row">
+                <div class="problem-card" data-index="4">
+                    <div class="problem-number">题目5</div>
+                    <div class="problem-expression">48 + 408 = ?</div>
+                </div>
+                <div class="problem-card" data-index="5">
+                    <div class="problem-number">题目6</div>
+                    <div class="problem-expression">236 + 264 = ?</div>
+                </div>
+                <div class="problem-card" data-index="6">
+                    <div class="problem-number">题目7</div>
+                    <div class="problem-expression">520 + 300 = ?</div>
+                </div>
+                <div class="problem-card" data-index="7">
+                    <div class="problem-number">题目8</div>
+                    <div class="problem-expression">247 + 153 = ?</div>
+                </div>
+            </div>
+            
+            <div class="problem-row">
+                <div class="problem-card" data-index="8">
+                    <div class="problem-number">题目9</div>
+                    <div class="problem-expression">383 + 297 = ?</div>
+                </div>
+                <div class="problem-card" data-index="9">
+                    <div class="problem-number">题目10</div>
+                    <div class="problem-expression">107 + 596 = ?</div>
+                </div>
+                <div class="problem-card" data-index="10">
+                    <div class="problem-number">题目11</div>
+                    <div class="problem-expression">88 + 341 = ?</div>
+                </div>
+                <div class="problem-card" data-index="11">
+                    <div class="problem-number">题目12</div>
+                    <div class="problem-expression">589 - 179 = ?</div>
+                </div>
+            </div>
+            
+            <div class="problem-row">
+                <div class="problem-card" data-index="12">
+                    <div class="problem-number">题目13</div>
+                    <div class="problem-expression">477 - 182 = ?</div>
+                </div>
+                <div class="problem-card" data-index="13">
+                    <div class="problem-number">题目14</div>
+                    <div class="problem-expression">845 - 355 = ?</div>
+                </div>
+                <div class="problem-card" data-index="14">
+                    <div class="problem-number">题目15</div>
+                    <div class="problem-expression">680 - 258 = ?</div>
+                </div>
+                <div class="problem-card" data-index="15">
+                    <div class="problem-number">题目16</div>
+                    <div class="problem-expression">710 - 418 = ?</div>
+                </div>
+            </div>
+            
+            <div class="problem-row">
+                <div class="problem-card" data-index="16">
+                    <div class="problem-number">题目17</div>
+                    <div class="problem-expression">753 - 735 = ?</div>
+                </div>
+                <div class="problem-card" data-index="17">
+                    <div class="problem-number">题目18</div>
+                    <div class="problem-expression">27 + 498 - 27 = ?</div>
+                </div>
+                <div class="problem-card" data-index="18">
+                    <div class="problem-number">题目19</div>
+                    <div class="problem-expression">236 + 489 - 389 = ?</div>
+                </div>
+                <div class="problem-card" data-index="19">
+                    <div class="problem-number">题目20</div>
+                    <div class="problem-expression">237 + 263 + 100 = ?</div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="solutionContainer" class="solution-container">
+            <h2 class="solution-title">巧算步骤解析</h2>
+            <div id="solutionContent"></div>
+            <button id="closeBtn">关闭解析</button>
+        </section>
+        
+        <footer>
+            <p>口算巧算练习 - 帮助孩子掌握快速计算技巧 | 每天练习10分钟，计算能力大提升！</p>
+        </footer>
+    </div>
+    
+    <script>
+        // 题目数据（包含原题和新题）
+        const problems = [
+            // 原题目
+            {
+                expression: "783 + 299",
+                steps: [
+                    "第一步：观察数字，<span class='step-highlight'>299接近300</span>，可以凑整计算",
+                    "第二步：把299看作300，算式变成 <span class='step-highlight'>783 + 300 = 1083</span>",
+                    "第三步：因为我们多加了1（300比299大1），所以要减去1",
+                    "第四步：<span class='step-highlight'>1083 - 1 = 1082</span>"
+                ],
+                answer: "783 + 299 = 1082",
+                tips: "技巧：凑整法（把接近整百的数凑整后再减去多加的部分）"
+            },
+            {
+                expression: "589 + 179",
+                steps: [
+                    "第一步：把179拆分成180 - 1",
+                    "第二步：算式变成 <span class='step-highlight'>589 + 180 - 1</span>",
+                    "第三步：先计算589 + 180 = 769",
+                    "第四步：再减去1：<span class='step-highlight'>769 - 1 = 768</span>"
+                ],
+                answer: "589 + 179 = 768",
+                tips: "技巧：拆分法（把加数拆成容易计算的数）"
+            },
+            {
+                expression: "186 + 314",
+                steps: [
+                    "第一步：把186拆成180 + 6，把314拆成300 + 14",
+                    "第二步：算式变成 <span class='step-highlight'>(180 + 300) + (6 + 14)</span>",
+                    "第三步：先计算180 + 300 = 480",
+                    "第四步：再计算6 + 14 = 20",
+                    "第五步：<span class='step-highlight'>480 + 20 = 500</span>"
+                ],
+                answer: "186 + 314 = 500",
+                tips: "技巧：拆分法（把两个数拆分成整十整百和个位数）"
+            },
+            {
+                expression: "680 + 258",
+                steps: [
+                    "第一步：把258拆成200 + 58",
+                    "第二步：算式变成 <span class='step-highlight'>680 + 200 + 58</span>",
+                    "第三步：先计算680 + 200 = 880",
+                    "第四步：再计算880 + 58 = <span class='step-highlight'>938</span>"
+                ],
+                answer: "680 + 258 = 938",
+                tips: "技巧：拆分法（把加数拆成整百数和剩余部分）"
+            },
+            {
+                expression: "48 + 408",
+                steps: [
+                    "第一步：把48拆成50 - 2",
+                    "第二步：算式变成 <span class='step-highlight'>50 - 2 + 408</span>",
+                    "第三步：先计算50 + 408 = 458",
+                    "第四步：再减去2：<span class='step-highlight'>458 - 2 = 456</span>"
+                ],
+                answer: "48 + 408 = 456",
+                tips: "技巧：凑整法（把一个数凑成整十数）"
+            },
+            {
+                expression: "236 + 264",
+                steps: [
+                    "第一步：观察发现36 + 64 = 100",
+                    "第二步：把236拆成200 + 36，把264拆成200 + 64",
+                    "第三步：算式变成 <span class='step-highlight'>(200 + 200) + (36 + 64)</span>",
+                    "第四极：计算200 + 200 = 400",
+                    "第五步：计算36 + 64 = 100",
+                    "第六步：<span class='step-highlight'>400 + 100 = 500</span>"
+                ],
+                answer: "236 + 264 = 500",
+                tips: "技巧：凑整法（寻找互补的个位数凑成整十整百）"
+            },
+            {
+                expression: "520 + 300",
+                steps: [
+                    "第一步：这是最简单的整百数加法",
+                    "第二步：520可以看作52个十，300是30个十",
+                    "第三步：<span class='step-highlight'>52 + 30 = 82</span>个十",
+                    "第四步：82个十就是820"
+                ],
+                answer: "520 + 300 = 820",
+                tips: "技巧：整百数加法（把加数看作多少个百或十）"
+            },
+            {
+                expression: "247 + 153",
+                steps: [
+                    "第一步：把247拆成240 + 7，把153拆成150 + 3",
+                    "第二步：算式变成 <span class='step-highlight'>(240 + 150) + (7 + 3)</span>",
+                    "第三步：计算240 + 150 = 390",
+                    "第四步：计算7 + 3 = 10",
+                    "第五步：<span class='step-highlight'>390 + 10 = 400</span>"
+                ],
+                answer: "247 + 153 = 400",
+                tips: "技巧：拆分法（把两位数拆成整十数和个位数）"
+            },
+            {
+                expression: "383 + 297",
+                steps: [
+                    "第一步：297接近300，可以凑整计算",
+                    "第二步：把297看作300，算式变成 <span class='step-highlight'>383 + 300 = 683</span>",
+                    "第三步：因为我们多加了3（300比297大3），所以要减去3",
+                    "第四步：<span class='step-highlight'>683 - 3 = 680</span>"
+                ],
+                answer: "383 + 297 = 680",
+                tips: "技巧：凑整法（把接近整百的数凑整后再减去多加的部分）"
+            },
+            {
+                expression: "107 + 596",
+                steps: [
+                    "第一步：596接近600，可以凑整计算",
+                    "第二步：把596看作600，算式变成 <span class='step-highlight'>107 + 600 = 707</span>",
+                    "第三步：因为我们多加了4（600比596大4），所以要减去4",
+                    "第四步：<span class='step-highlight'>707 - 4 = 703</span>"
+                ],
+                answer: "107 + 596 = 703",
+                tips: "技巧：凑整法（把接近整百的数凑整后再减去多加的部分）"
+            },
+            // 新添加的题目（从图片中选取不重复的题目）
+            {
+                expression: "88 + 341",
+                steps: [
+                    "第一步：把88拆成80 + 8，把341拆成340 + 1",
+                    "第二步：算式变成 <span class='step-highlight'>80 + 340 + 8 + 1</span>",
+                    "第三步：计算80 + 340 = 420",
+                    "第四步：计算8 + 1 = 9",
+                    "第五步：<span class='step-highlight'>420 + 9 = 429</span>"
+                ],
+                answer: "88 + 341 = 429",
+                tips: "技巧：拆分法（把数拆分成整十数和个位数）"
+            },
+            {
+                expression: "589 - 179",
+                steps: [
+                    "第一步：把179拆成180 - 1",
+                    "第二步：算式变成 <span class='step-highlight'>589 - 180 + 1</span>（因为减180等于多减了1）",
+                    "第三步：计算589 - 180 = 409",
+                    "第四步：<span class='step-highlight'>409 + 1 = 410</span>"
+                ],
+                answer: "589 - 179 = 410",
+                tips: "技巧：拆分法（拆分减数凑整）"
+            },
+            {
+                expression: "477 - 182",
+                steps: [
+                    "第一步：把182拆成180 + 2",
+                    "第二步：算式变成 <span class='step-highlight'>477 - 180 - 2</span>",
+                    "第三步：计算477 - 180 = 297",
+                    "第四步：<span class='step-highlight'>297 - 2 = 295</span>"
+                ],
+                answer: "477 - 182 = 295",
+                tips: "技巧：拆分法（拆分减数凑整）"
+            },
+            {
+                expression: "845 - 355",
+                steps: [
+                    "第一步：把355拆成350 + 5",
+                    "第二步：算式变成 <span class='step-highlight'>845 - 350 - 5</span>",
+                    "第三步：计算845 - 350 = 495",
+                    "第四步：<span class='step-highlight'>495 - 5 = 490</span>"
+                ],
+                answer: "845 - 355 = 490",
+                tips: "技巧：拆分法（拆分减数凑整）"
+            },
+            {
+                expression: "680 - 258",
+                steps: [
+                    "第一步：把258拆成260 - 2",
+                    "第二步：算式变成 <span class='step-highlight'>680 - 260 + 2</span>（因为减260等于多减了2）",
+                    "第三步：计算680 - 260 = 420",
+                    "第四步：<span class='step-highlight'>420 + 2 = 422</span>"
+                ],
+                answer: "680 - 258 = 422",
+                tips: "技巧：拆分法（拆分减数凑整）"
+            },
+            {
+                expression: "710 - 418",
+                steps: [
+                    "第一步：把418拆成420 - 2",
+                    "第二步：算式变成 <span class='step-highlight'>710 - 420 + 2</span>",
+                    "第三步：计算710 - 420 = 290",
+                    "第四步：<span class='step-highlight'>290 + 2 = 292</span>"
+                ],
+                answer: "710 - 418 = 292",
+                tips: "技巧：拆分法（拆分减数凑整）"
+            },
+            {
+                expression: "753 - 735",
+                steps: [
+                    "第一步：发现753和735个位和十位有特点",
+                    "第二步：把735拆成730 + 5",
+                    "第三步：算式变成 <span class='step-highlight'>753 - 730 - 5</span>",
+                    "第四步：计算753 - 730 = 23",
+                    "第五步：<span class='step-highlight'>23 - 5 = 18</span>"
+                ],
+                answer: "753 - 735 = 18",
+                tips: "技巧：分步相减（先减整十数，再减个位数）"
+            },
+            {
+                expression: "27 + 498 - 27",
+                steps: [
+                    "第一步：发现算式中有+27和-27，可以抵消",
+                    "第二步：先计算 <span class='step-highlight'>27 - 27 = 0</span>",
+                    "第三步：剩下498 + 0 = 498",
+                    "第四步：<span class='step-highlight'>498</span>就是最终结果"
+                ],
+                answer: "27 + 498 - 27 = 498",
+                tips: "技巧：抵消法（消除相同但符号相反的数）"
+            },
+            {
+                expression: "236 + 489 - 389",
+                steps: [
+                    "第一步：先计算减法的部分：<span class='step-highlight'>489 - 389 = 100</span>",
+                    "第二步：再将这个结果与236相加",
+                    "第三步：<span class='step-highlight'>236 + 100 = 336</span>"
+                ],
+                answer: "236 + 489 - 389 = 336",
+                tips: "技巧：分步计算（先计算可以凑整的部分）"
+            },
+            {
+                expression: "237 + 263 + 100",
+                steps: [
+                    "第一步：先计算237 + 263",
+                    "第二步：观察发现37 + 63 = 100，200 + 200 = 400",
+                    "第三步：<span class='step-highlight'>200 + 200 + 37 + 63 = 400 + 100 = 500</span>",
+                    "第四步：再加上100：<span class='step-highlight'>500 + 100 = 600</span>"
+                ],
+                answer: "237 + 263 + 100 = 600",
+                tips: "技巧：拆分法（将数拆分成百位和十位个位计算）"
+            }
+        ];
+        
+        // 获取DOM元素
+        const problemCards = document.querySelectorAll('.problem-card');
+        const solutionContainer = document.getElementById('solutionContainer');
+        const solutionContent = document.getElementById('solutionContent');
+        const closeBtn = document.getElementById('closeBtn');
+        
+        // 添加题目点击事件
+        problemCards.forEach(card => {
+            card.addEventListener('click', () => {
+                // 移除所有选中样式
+                problemCards.forEach(c => c.classList.remove('selected'));
+                // 添加当前选中样式
+                card.classList.add('selected');
+                
+                // 获取题目索引
+                const index = parseInt(card.dataset.index);
+                const problem = problems[index];
+                
+                // 构建解析内容
+                let content = `
+                    <h2 class="solution-title">题目${index + 1}：${problem.expression} 巧算步骤</h2>
+                    <ol class="solution-steps">
+                `;
+                
+                problem.steps.forEach(step => {
+                    content += `<li>${step}</li>`;
+                });
+                
+                content += `
+                    </ol>
+                    <div class="final-answer">${problem.answer}</div>
+                    <div class="tips"><strong>技巧总结：</strong> ${problem.tips}</div>
+                `;
+                
+                // 显示解析
+                solutionContent.innerHTML = content;
+                solutionContainer.classList.add('show');
+                
+                // 滚动到解析区域
+                solutionContainer.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+        
+        // 关闭解析按钮
+        closeBtn.addEventListener('click', () => {
+            solutionContainer.classList.remove('show');
+            problemCards.forEach(c => c.classList.remove('selected'));
+        });
+    </script>
+</body>
+</html>
