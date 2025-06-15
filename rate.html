@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>贷款真实利率（IRR）计算器</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6a5af9;
+            --secondary: #d66efd;
+            --success: #42b883;
+            --warning: #ffcf40;
+            --danger: #e95979;
+            --info: #38b6ff;
+            --dark: #333645;
+            --light: #f8f9fc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--dark);
+        }
+        
+        .header {
+            text-align: center;
+            margin: 20px 0 30px;
+            max-width: 900px;
+            padding: 0 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        
+        .education-box {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid var(--warning);
+            text-align: left;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .education-box h3 {
+            color: var(--warning);
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+        
+        .education-box ul {
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+        
+        .education-box li {
+            margin-bottom: 8px;
+        }
+        
+        .education-box .warning {
+            font-weight: 600;
+            color: var(--danger);
+        }
+        
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            max-width: 1400px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(106, 90, 249, 0.2);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title i {
+            margin-right: 10px;
+        }
+        
+        .input-section {
+            min-width: 400px;
+            flex: 1;
+        }
+        
+        .result-section {
+            min-width: 400px;
+            flex: 1;
+        }
+        
+        .detail-section {
+            min-width: 400px;
+            width: 100%;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+        
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-container .symbol {
+            position: absolute;
+            left: 15px;
+            color: #777;
+            font-size: 1.2rem;
+            z-index: 1;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 14px 20px 14px 40px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            color: #444;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #eee;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(106, 90, 249, 0.3);
+        }
+        
+        .tab-container {
+            display: flex;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            background: rgba(106, 90, 249, 0.1);
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .payment-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid #eee;
+        }
+        
+        .payment-row:hover {
+            background: rgba(106,90,249,0.08);
+            transform: translateX(3px);
+        }
+        
+        .payment-row .month-label {
+            width: 100px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .payment-row .payment-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .payment-row .payment-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(106,90,249,0.2);
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(106, 90, 249, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn i {
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(106, 90, 249, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn.reset {
+            background: linear-gradient(45deg, var(--dark), #555);
+            margin-top: 15px;
+        }
+        
+        .result-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .result-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 5px;
+        }
+        
+        .result-label {
+            color: var(--dark);
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+        
+        .chart-container {
+            height: 250px;
+            width: 100%;
+            margin-top: 25px;
+        }
+        
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 120px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .stat-card .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card.nominal .value {
+            color: var(--info);
+        }
+        
+        .stat-card.irr .value {
+            color: var(--danger);
+        }
+        
+        .stat-card.interest .value {
+            color: var(--warning);
+        }
+        
+        .stat-card.total .value {
+            color: var(--success);
+        }
+        
+        .stat-card .label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .payments-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            padding-right: 10px;
+        }
+        
+        .payment-card {
+            background: white;
+            border-radius: 15px;
+            padding: 18px 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            display: grid;
+            grid-template-columns: 80px 1fr 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .payment-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 20px rgba(106, 90, 249, 0.15);
+        }
+        
+        .payment-card .month {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .payment-card .principal {
+            color: var(--success);
+            font-weight: 500;
+        }
+        
+        .payment-card .interest {
+            color: var(--danger);
+            font-weight: 500;
+        }
+        
+        .payment-card .total {
+            font-weight: 600;
+            text-align: right;
+            color: var(--dark);
+        }
+        
+        .payment-header {
+            display: grid;
+            grid-template-columns: 80px 1fr 1fr 1fr;
+            gap: 15px;
+            padding: 10px 20px;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid #eee;
+            margin-bottom: 10px;
+        }
+        
+        .payment-header .total {
+            text-align: right;
+        }
+        
+        @media (max-width: 900px) {
+            .app-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .input-section, .result-section, .detail-section {
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .payment-card, .payment-header {
+                grid-template-columns: 70px 1fr 1fr;
+            }
+            
+            .payment-header .principal, 
+            .payment-card .principal {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>贷款真实利率（IRR）计算器</h1>
+        <p>精准计算贷款内部收益率，揭露真实的融资成本。等额本息还款的真实利率远高于名义利率</p>
+        
+        <div class="education-box">
+            <h3><i class="fas fa-exclamation-triangle"></i> 重要提醒：为什么真实利率更高？</h3>
+            <p>在等额本息还款方式中，<span class="warning">真实利率（IRR）通常远高于名义利率</span>，原因如下：</p>
+            <ul>
+                <li>利息按初始本金计算，但每月您偿还了部分本金</li>
+                <li>虽然每月还款金额相同，但本金在减少而利息未相应减少</li>
+                <li>贷款机构通常只宣传名义利率，<span class="warning">隐藏了真实的高成本</span></li>
+                <li>短期贷款的实际成本更高（如12个月贷款的真实IRR可能比名义利率高70%）</li>
+            </ul>
+            <p>使用本工具计算真实年化利率（IRR），避免被名义利率误导！</p>
+        </div>
+    </div>
+    
+    <div class="app-container">
+        <!-- 输入卡片 -->
+        <div class="card input-section">
+            <h2 class="card-title"><i class="fas fa-calculator"></i>贷款参数设置</h2>
+            
+            <div class="form-group">
+                <label>贷款金额（元）</label>
+                <div class="input-container">
+                    <span class="symbol">¥</span>
+                    <input type="number" id="loanAmount" value="100000" min="1000" step="1000">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>贷款期限（月）</label>
+                <div class="input-container">
+                    <select id="loanTerm">
+                        <option value="3">3个月</option>
+                        <option value="6">6个月</option>
+                        <option value="12" selected>12个月</option>
+                        <option value="24">24个月</option>
+                        <option value="36">36个月</option>
+                        <option value="48">48个月</option>
+                        <option value="60">60个月</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>还款方式</label>
+                <div class="tab-container">
+                    <div class="tab active" data-tab="fixed">等额本息还款</div>
+                    <div class="tab" data-tab="manual">手动输入金额</div>
+                </div>
+                
+                <div class="tab-content active" id="fixed-rate-content">
+                    <div class="form-group">
+                        <label>名义年利率 (%)</label>
+                        <div class="input-container">
+                            <span class="symbol">%</span>
+                            <input type="number" id="loanRate" value="6.0" min="0.1" step="0.1">
+                        </div>
+                        <p style="font-size: 0.9rem; margin-top: 5px; color: #666;">
+                            提示：名义利率≠真实利率，计算结果可能远高于此
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="manual-input-content">
+                    <div class="payment-inputs" id="paymentInputs">
+                        <div class="payment-row">
+                            <span class="month-label">第1个月</span>
+                            <input type="number" class="payment-input" placeholder="还款金额" value="8830">
+                        </div>
+                        <div class="payment-row">
+                            <span class="month-label">第2个月</span>
+                            <input type="number" class="payment-input" placeholder="还款金额" value="8830">
+                        </div>
+                        <div class="payment-row">
+                            <span class="month-label">第3个月</span>
+                            <input type="number" class="payment-input" placeholder="还款金额" value="8830">
+                        </div>
+                        <!-- 其他月份将通过JavaScript动态生成 -->
+                    </div>
+                    <button id="fillRestBtn" class="btn" style="margin-top: 15px; padding: 12px; font-size: 0.95rem;">
+                        <i class="fas fa-copy"></i> 填充剩余月份相同金额
+                    </button>
+                </div>
+            </div>
+            
+            <button class="btn" id="calculateBtn">
+                <i class="fas fa-calculator"></i> 计算真实利率
+            </button>
+            
+            <button class="btn reset" id="resetBtn">
+                <i class="fas fa-redo"></i> 重置所有数据
+            </button>
+        </div>
+        
+        <!-- 结果卡片 -->
+        <div class="card result-section">
+            <h2 class="card-title"><i class="fas fa-chart-line"></i>计算结果对比</h2>
+            
+            <div class="result-display">
+                <div class="result-value" id="irrValue">10.92%</div>
+                <div class="result-label">真实年化利率 (IRR)</div>
+                
+                <div class="stats-container">
+                    <div class="stat-card nominal">
+                        <div class="value" id="nominalRate">6.0%</div>
+                        <div class="label">名义利率</div>
+                    </div>
+                    <div class="stat-card irr">
+                        <div class="value" id="realRate">10.92%</div>
+                        <div class="label">真实利率 (IRR)</div>
+                    </div>
+                    <div class="stat-card interest">
+                        <div class="value" id="totalInterest">¥3,500</div>
+                        <div class="label">总利息成本</div>
+                    </div>
+                    <div class="stat-card total">
+                        <div class="value" id="totalPayment">¥103,500</div>
+                        <div class="label">总还款金额</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="irrChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- 详细还款卡片 -->
+        <div class="card detail-section">
+            <h2 class="card-title"><i class="fas fa-receipt"></i>月还款详情分析</h2>
+            
+            <div id="summaryContainer" style="margin: 15px 0; background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; text-align: center;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <div>贷款金额: <strong style="color: var(--success);">¥100,000.00</strong></div>
+                    <div>总利息: <strong style="color: var(--danger);">¥3,500.00</strong></div>
+                    <div>总还款: <strong style="color: var(--success);">¥103,500.00</strong></div>
+                </div>
+                <div style="font-size: 0.95rem; color: var(--danger);">
+                    <i class="fas fa-info-circle"></i> 
+                    等额本息前期主要偿还利息而非本金，导致真实成本较高
+                </div>
+            </div>
+            
+            <div class="payment-header">
+                <span>期数</span>
+                <span>本金</span>
+                <span>利息</span>
+                <span class="total">月还款</span>
+            </div>
+            
+            <div class="payments-container" id="paymentPlanContainer">
+                <!-- 还款计划将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化图表
+        let irrChart;
+        function initChart() {
+            const ctx = document.getElementById('irrChart').getContext('2d');
+            irrChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['贷款本金', '总利息成本'],
+                    datasets: [{
+                        data: [100000, 3500],
+                        backgroundColor: [
+                            'rgba(106, 90, 249, 0.8)',
+                            'rgba(255, 207, 64, 0.8)'
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 14
+                                },
+                                padding: 20,
+                                usePointStyle: true,
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ¥${context.raw.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 标签切换功能
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                
+                // 更新标签
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 更新内容
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if(content.id === `${tabName}-input-content`) {
+                        content.classList.add('active');
+                    }
+                });
+                
+                // 如果切换到手动输入标签，更新付款输入行
+                if(tabName === 'manual') {
+                    updatePaymentInputs();
+                }
+            });
+        });
+        
+        // 根据贷款期限更新付款输入行
+        function updatePaymentInputs() {
+            const loanTerm = parseInt(document.getElementById('loanTerm').value);
+            const paymentInputs = document.getElementById('paymentInputs');
+            
+            // 清除现有输入行（保留前3个示例）
+            while (paymentInputs.children.length > 3) {
+                paymentInputs.removeChild(paymentInputs.lastChild);
+            }
+            
+            // 添加额外的付款输入行
+            for (let i = paymentInputs.children.length; i < loanTerm; i++) {
+                const paymentRow = document.createElement('div');
+                paymentRow.className = 'payment-row';
+                paymentRow.innerHTML = `
+                    <span class="month-label">第${i+1}个月</span>
+                    <input type="number" class="payment-input" placeholder="还款金额">
+                `;
+                paymentInputs.appendChild(paymentRow);
+            }
+        }
+        
+        // 填充剩余月份按钮
+        document.getElementById('fillRestBtn').addEventListener('click', function() {
+            const loanTerm = parseInt(document.getElementById('loanTerm').value);
+            const paymentInputs = document.querySelectorAll('.payment-input');
+            
+            if (paymentInputs.length > 0) {
+                const firstPaymentValue = paymentInputs[0].value || '0';
+                
+                paymentInputs.forEach((input, index) => {
+                    if (index >= 3) { // 只填充前3个之后的输入
+                        input.value = firstPaymentValue;
+                    }
+                });
+            }
+        });
+        
+        // 当贷款期限改变时更新手动输入界面
+        document.getElementById('loanTerm').addEventListener('change', function() {
+            const currentTab = document.querySelector('.tab.active').dataset.tab;
+            
+            if (currentTab === 'manual') {
+                updatePaymentInputs();
+            }
+        });
+        
+        // 重置按钮
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            // 重置输入值
+            document.getElementById('loanAmount').value = '100000';
+            document.getElementById('loanTerm').value = '12';
+            document.getElementById('loanRate').value = '6.0';
+            
+            // 重置选项卡
+            tabs.forEach((t, index) => {
+                if (index === 0) t.classList.add('active');
+                else t.classList.remove('active');
+            });
+            tabContents.forEach((c, index) => {
+                if (index === 0) c.classList.add('active');
+                else c.classList.remove('active');
+            });
+            
+            // 重置计算结果
+            calculateAndDisplay(true);
+        });
+        
+        // 计算等额本息贷款的真实IRR
+        function calculateEqualInstallments(loanAmount, annualRate, loanTerm) {
+            const monthlyRate = annualRate / 100 / 12;
+            // 等额本息月供公式
+            const monthlyPayment = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanTerm) / 
+                                  (Math.pow(1 + monthlyRate, loanTerm) - 1);
+            
+            // 计算真实IRR（内部收益率）
+            const cashFlows = [-loanAmount];
+            for (let i = 0; i < loanTerm; i++) {
+                cashFlows.push(monthlyPayment);
+            }
+            
+            // 精确计算IRR
+            const irr = calculateIRR(cashFlows);
+            
+            // 计算还款计划
+            let remainingPrincipal = loanAmount;
+            const paymentPlan = [];
+            
+            for (let i = 0; i < loanTerm; i++) {
+                const interest = remainingPrincipal * monthlyRate;
+                const principal = monthlyPayment - interest;
+                remainingPrincipal -= principal;
+                
+                paymentPlan.push({
+                    principal: principal,
+                    interest: interest,
+                    total: monthlyPayment
+                });
+            }
+            
+            return {
+                monthlyPayment: monthlyPayment,
+                irr: irr,
+                cashFlows: cashFlows,
+                paymentPlan: paymentPlan,
+                totalInterest: monthlyPayment * loanTerm - loanAmount,
+                totalPayment: monthlyPayment * loanTerm
+            };
+        }
+        
+        // IRR计算函数（使用二分法）
+        function calculateIRR(cashFlows) {
+            let lowRate = 0.0;
+            let highRate = 1.0; // 100%作为上限
+            const tolerance = 0.000001; // 容差
+            const maxIterations = 1000; // 最大迭代次数
+            
+            function npv(rate) {
+                let value = 0;
+                for (let i = 0; i < cashFlows.length; i++) {
+                    value += cashFlows[i] / Math.pow(1 + rate, i);
+                }
+                return value;
+            }
+            
+            for (let i = 0; i < maxIterations; i++) {
+                const midRate = (lowRate + highRate) / 2;
+                const npvMid = npv(midRate);
+                
+                if (Math.abs(npvMid) < tolerance) {
+                    // 转换为年化复利
+                    const annualIRR = (Math.pow(1 + midRate, 12) - 1) * 100;
+                    return parseFloat(annualIRR.toFixed(2));
+                }
+                
+                if (npvMid > 0) {
+                    lowRate = midRate;
+                } else {
+                    highRate = midRate;
+                }
+            }
+            
+            // 默认返回
+            const finalRate = (lowRate + highRate) / 2;
+            const annualIRR = (Math.pow(1 + finalRate, 12) - 1) * 100;
+            return parseFloat(annualIRR.toFixed(2));
+        }
+        
+        // 生成还款计划HTML
+        function generatePaymentPlanHTML(paymentPlan) {
+            let html = '';
+            
+            paymentPlan.forEach((payment, index) => {
+                html += `
+                    <div class="payment-card">
+                        <span class="month">第${index+1}个月</span>
+                        <span class="principal">¥${payment.principal.toFixed(2)}</span>
+                        <span class="interest">¥${payment.interest.toFixed(2)}</span>
+                        <span class="total">¥${payment.total.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+        
+        // 更新结果展示
+        function updateResults(data) {
+            const { nominalRate, irr, totalInterest, totalPayment, paymentPlan } = data;
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+            
+            // 更新结果区域
+            document.getElementById('irrValue').textContent = `${irr.toFixed(2)}%`;
+            document.getElementById('nominalRate').textContent = `${nominalRate.toFixed(2)}%`;
+            document.getElementById('realRate').textContent = `${irr.toFixed(2)}%`;
+            document.getElementById('totalInterest').textContent = `¥${totalInterest.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+            document.getElementById('totalPayment').textContent = `¥${totalPayment.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
+            
+            // 更新摘要信息
+            document.getElementById('summaryContainer').innerHTML = `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <div>贷款金额: <strong style="color: var(--success);">¥${loanAmount.toLocaleString()}</strong></div>
+                    <div>总利息: <strong style="color: var(--danger);">¥${totalInterest.toFixed(2)}</strong></div>
+                    <div>总还款: <strong style="color: var(--success);">¥${totalPayment.toFixed(2)}</strong></div>
+                </div>
+                <div style="font-size: 0.95rem; color: var(--danger);">
+                    <i class="fas fa-info-circle"></i> 
+                    等额本息前期主要偿还利息而非本金，导致真实成本较高
+                </div>
+            `;
+            
+            // 更新还款计划
+            document.getElementById('paymentPlanContainer').innerHTML = generatePaymentPlanHTML(paymentPlan);
+            
+            // 更新图表
+            irrChart.data.datasets[0].data = [loanAmount, totalInterest];
+            irrChart.update();
+        }
+        
+        // 主要计算和展示函数
+        function calculateAndDisplay(isReset = false) {
+            // 获取当前激活的标签
+            const currentTab = document.querySelector('.tab.active').dataset.tab;
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+            const loanTerm = parseInt(document.getElementById('loanTerm').value);
+            
+            let resultData;
+            
+            if (isReset) {
+                // 使用默认值计算结果
+                resultData = calculateEqualInstallments(100000, 6.0, 12);
+                resultData.nominalRate = 6.0;
+            } else if (currentTab === 'fixed') {
+                // 固定利率模式的计算逻辑
+                const nominalRate = parseFloat(document.getElementById('loanRate').value);
+                
+                // 计算等额本息还款
+                resultData = calculateEqualInstallments(loanAmount, nominalRate, loanTerm);
+                resultData.nominalRate = nominalRate;
+            } else {
+                // 手动输入模式的计算逻辑
+                const paymentInputs = document.querySelectorAll('.payment-input');
+                const payments = Array.from(paymentInputs).map(input => parseFloat(input.value) || 0);
+                
+                if (payments.length > 0) {
+                    // 计算真实IRR
+                    const cashFlows = [-loanAmount].concat(payments);
+                    const irr = calculateIRR(cashFlows);
+                    
+                    const totalPayment = payments.reduce((acc, val) => acc + val, 0);
+                    const totalInterest = totalPayment - loanAmount;
+                    
+                    // 构造还款计划（手动输入模式，不显示本金利息拆分）
+                    const paymentPlan = payments.map(total => ({
+                        principal: 0,
+                        interest: 0,
+                        total: total
+                    }));
+                    
+                    resultData = {
+                        nominalRate: 0,
+                        irr: irr,
+                        totalInterest: totalInterest,
+                        totalPayment: totalPayment,
+                        paymentPlan: paymentPlan
+                    };
+                } else {
+                    // 如果没有输入，则使用默认值
+                    resultData = calculateEqualInstallments(100000, 6.0, 12);
+                    resultData.nominalRate = 6.0;
+                }
+            }
+            
+            // 更新UI
+            updateResults(resultData);
+        }
+        
+        // 初始化页面
+        function initPage() {
+            initChart();
+            updatePaymentInputs();
+            calculateAndDisplay(true); // 使用默认值初始化计算
+        }
+        
+        // 计算按钮事件
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            calculateAndDisplay();
+        });
+        
+        // 页面加载时初始化
+        window.onload = initPage;
+    </script>
+</body>
+</html>
